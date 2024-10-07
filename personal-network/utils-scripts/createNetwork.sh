@@ -5,10 +5,10 @@ set -e
 set -o pipefail 
 function init(){
     echo "Adding the bin of hyperledger fabric to the PATH..."
-    export PATH=$PATH:/home/keo/Documents/blockchain_related/simple-blockchain-demon/personal-network/bin
+    export PATH=$PATH:/home/kang/Desktop/CSTAD-ALL-CODE/hyperlager-fabric-setup-network/simple-blockchain-demo/personal-network/bin
     # we should use this 
     # export .. $(pwd)/config 
-    export FABRIC_CFG_PATH=/home/keo/Documents/blockchain_related/simple-blockchain-demon/personal-network/config
+    export FABRIC_CFG_PATH=/home/kang/Desktop/CSTAD-ALL-CODE/hyperlager-fabric-setup-network/simple-blockchain-demo/personal-network/config
 }
 
 function generateCryptoConfig(){
