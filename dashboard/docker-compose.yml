@@ -1,0 +1,57 @@
+
+volumes:
+  pgdata:
+  walletstore:
+
+networks:
+  mynetwork.com:
+    external: true
+    name: net_byfn
+
+services:
+
+  explorerdb.personal-network.com:
+    image: ghcr.io/hyperledger-labs/explorer-db:latest
+    container_name: explorerdb.personal-network.com
+    hostname: explorerdb.personal-network.com
+    environment:
+      - DATABASE_DATABASE=fabricexplorer
+      - DATABASE_USERNAME=hppoc
+      - DATABASE_PASSWORD=password  # Ensure consistent variable name
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -q -U hppoc"  # Changed to match DATABASE_USERNAME
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - mynetwork.com
+
+  explorer.personal-network.com:
+    image: ghcr.io/hyperledger-labs/explorer:latest
+    container_name: explorer.personal-network.com
+    hostname: explorer.personal-network.com
+    environment:
+      - DATABASE_HOST=explorerdb.personal-network.com
+      - DATABASE_DATABASE=fabricexplorer
+      - DATABASE_USERNAME=hppoc
+      - DATABASE_PASSWORD=password  # Consistent variable name
+      - LOG_LEVEL_APP=info
+      - LOG_LEVEL_DB=info
+      - LOG_LEVEL_CONSOLE=debug
+      - LOG_CONSOLE_STDOUT=true
+      - DISCOVERY_AS_LOCALHOST=false
+      - PORT=${PORT:-8080}  # Ensure PORT is defined in your environment or .env file
+    volumes:
+      - ${EXPLORER_CONFIG_FILE_PATH}:/opt/explorer/app/platform/fabric/config.json
+      - ${EXPLORER_PROFILE_DIR_PATH}:/opt/explorer/app/platform/fabric/connection-profile
+      - ${FABRIC_CRYPTO_PATH}:/tmp/crypto
+      - walletstore:/opt/explorer/wallet
+    ports:
+      - ${PORT:-8080}:${PORT:-8080}
+    depends_on:
+      explorerdb.personal-network.com:
+        condition: service_healthy
+    networks:
+      - mynetwork.com

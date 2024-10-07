@@ -1,0 +1,75 @@
+version: '2'
+
+services: 
+  orderer.personal-network.com: 
+    container_name: orderer.personal-network.com
+    # image: hyperledger/fabric-orderer:latest
+    # understand that version fabric 2.3+  won't support the file based genesis block
+    image: hyperledger/fabric-orderer:2.2.9 
+    # orginal image 
+    # image: hyperledger/fabric-orderer
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/opt/gopath/fabric-samples/personal-network/channel-artifacts/genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # just added this cause sthere is a file bootstrap error 
+      # - ORDERER_GENERAL_BOOTSTRAPMETHOD=none
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      # admin endpoint for the channel participation api 
+      # - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:7053
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+    # i am adding :rw to the end of the volume to make it read and write
+    - ../channel-artifacts/genesis.block:/opt/gopath/fabric-samples/personal-network/channel-artifacts/genesis.block
+    - ../crypto-config/ordererOrganizations/personal-network.com/orderers/orderer.personal-network.com/msp:/var/hyperledger/orderer/msp
+    - ../crypto-config/ordererOrganizations/personal-network.com/orderers/orderer.personal-network.com/tls/:/var/hyperledger/orderer/tls
+    - orderer.personal-network.com:/var/hyperledger/production/orderer
+    ports:
+      - 7050:7050
+  peer0.org1.personal-network.com:
+    container_name: peer0.org1.personal-network.com
+    extends: 
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+        - GODEBUG=netdns=go
+        - CORE_PEER_ID=peer0.org1.personal-network.com
+        - CORE_PEER_ADDRESS=peer0.org1.personal-network.com:7051
+        - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.personal-network.com:7051
+        - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.personal-network.com:7051
+        - CORE_PEER_LOCALMSPID=Org1MSP
+    volumes: 
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org1.personal-network.com/peers/peer0.org1.personal-network.com/msp:/etc/hyperledger/fabric/msp:rw
+        - ../crypto-config/peerOrganizations/org1.personal-network.com/peers/peer0.org1.personal-network.com/tls:/etc/hyperledger/fabric/tls:rw
+        - peer0.org1.personal-network.com:/var/hyperledger/production   
+    ports:
+      - 7051:7051
+  
+  peer0.org2.personal-network.com: 
+    container_name: peer0.org2.personal-network.com
+    extends: 
+      file: peer-base.yaml
+      service: peer-base
+    environment: 
+        - GODEBUG=netdns=go
+        - CORE_PEER_ID=peer0.org2.personal-network.com
+        - CORE_PEER_ADDRESS=peer0.org2.personal-network.com:7051
+        - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.personal-network.com:7051
+        - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.personal-network.com:7051
+        - CORE_PEER_LOCALMSPID=Org2MSP
+    ports: 
+      - 9051:7051
+    volumes: 
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org2.personal-network.com/peers/peer0.org2.personal-network.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/org2.personal-network.com/peers/peer0.org2.personal-network.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.org2.personal-network.com:/var/hyperledger/production   

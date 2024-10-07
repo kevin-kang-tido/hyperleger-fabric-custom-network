@@ -1,0 +1,65 @@
+version: '2'
+volumes:
+  orderer.personal-network.com:
+  peer0.org1.personal-network.com:
+  peer0.org2.personal-network.com:
+networks:
+  byfn:
+services:
+  orderer.personal-network.com:
+    extends:
+      file:   base/docker-compose-base.yaml
+      service: orderer.personal-network.com
+    container_name: orderer.personal-network.com
+    networks:
+      - byfn
+  peer0.org1.personal-network.com:
+    container_name: peer0.org1.personal-network.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.org1.personal-network.com
+    networks:
+      - byfn
+  peer0.org2.personal-network.com:
+    container_name: peer0.org2.personal-network.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.org2.personal-network.com
+    networks:
+      - byfn
+  cli:
+    container_name: cli
+    image: hyperledger/fabric-tools
+    tty: true
+    stdin_open: true
+    dns_search: .
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      #- CORE_LOGGING_LEVEL=DEBUG
+      - CORE_LOGGING_LEVEL=INFO
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.org1.personal-network.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/fabric-samples/personal-network/crypto-config/peerOrganizations/org1.personal-network.com/peers/peer0.org1.personal-network.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/fabric-samples/personal-network/crypto-config/peerOrganizations/org1.personal-network.com/peers/peer0.be.personal-network.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/fabric-samples/personal-network/crypto-config/peerOrganizations/org2.personal-network.com/peers/peer0.org2.personal-network.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/fabric-samples/personal-network/crypto-config/peerOrganizations/org2.personal-network.com/users/Admin@org2.personal-network.com/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - "${CURRENT_DIR}/chaincode/:/opt/gopath/src/chain:rw"
+        - "${CURRENT_DIR}/crypto-config:/opt/gopath/fabric-samples/personal-network/crypto-config/:rw"
+        # - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+        - ./channel-artifacts:/opt/gopath/fabric-samples/personal-network/channel-artifacts:rw
+
+    depends_on:
+      - orderer.personal-network.com
+      - peer0.org1.personal-network.com
+      - peer0.org2.personal-network.com
+    networks:
+      - byfn
+# echo COMPOSE_PROJECT_NAME=net > .env      
+# docker-compose -f docker-compose-cli.yaml up -d

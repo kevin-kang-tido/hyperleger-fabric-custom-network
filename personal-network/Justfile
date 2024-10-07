@@ -1,0 +1,42 @@
+gp message:
+    #!/bin/bash
+    bash ../autopush.sh "{{message}}"
+network option: 
+    #!/bin/bash
+    case {{option}} in
+        "create")
+            bash utils-scripts/createNetwork.sh
+            # you can also start the dashboard here 
+            # just explorer start
+            ;;
+        "destroy")
+            bash utils-scripts/destroyNetwork.sh
+            # just explorer destroy
+            ;;
+        *)
+            echo "Invalid option"
+            ;;
+    esac
+     
+# use  just --list in order to see the available commands
+# chaincode option:
+explorer option: 
+    #!/bin/bash
+    case {{option}} in 
+        start)
+            cd ../dashboard
+            echo "This is the current directory: $(pwd)"
+            echo "Starting the hyperledger explorer dashboard...!"
+            docker compose up -d
+            ;;
+        destroy)
+        
+            cd ../dashboard 
+            echo "Destroying the hyperledger explorer....!"
+            echo $(pwd)
+            docker compose down -v
+            ;;
+        *)
+            echo "Usage: just explorer {start|destroy} "
+            ;;
+    esac
