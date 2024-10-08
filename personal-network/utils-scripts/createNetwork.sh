@@ -237,13 +237,13 @@ function createChannel(){
             --name becc
 
         # init 
-        # Chaincode invocation and query
+        # share all ledger to all org1 and org2
         echo "---> Invoking the chaincode (initLedger)...🚀🚀🚀"
         export ORDERER_CA=/opt/gopath/fabric-samples/personal-network/crypto-config/ordererOrganizations/personal-network.com/orderers/orderer.personal-network.com/msp/tlscacerts/tlsca.personal-network.com-cert.pem
         export PEER_ORG1_TLSROOTCERTFILES=/opt/gopath/fabric-samples/personal-network/crypto-config/peerOrganizations/org1.personal-network.com/peers/peer0.org1.personal-network.com/tls/ca.crt
         export PEER_ORG2_TLSROOTCERTFILES=/opt/gopath/fabric-samples/personal-network/crypto-config/peerOrganizations/org2.personal-network.com/peers/peer0.org2.personal-network.com/tls/ca.crt
         
-        # set data
+        # init data to ledger 
         peer chaincode invoke -o orderer.personal-network.com:7050 \
         --tls true --cafile $ORDERER_CA -C channeldemo \
         -n becc --peerAddresses peer0.org1.personal-network.com:7051 \
