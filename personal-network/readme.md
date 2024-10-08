@@ -11,11 +11,13 @@ With the version 2.2.x
 * This file is usually specified in the `orderer.yaml` under a parameter called `Genereal.BootstrapFile ` or `General.BootstrapMethod`
 ## After you have deployed the chaincode to the network 
 
+ 
 ```bash 
 export ORDERER_CA=/opt/gopath/fabric-samples/personal-network/crypto-config/ordererOrganizations/personal-network.com/orderers/orderer.personal-network.com/msp/tlscacerts/tlsca.personal-network.com-cert.pem
 export PEER_ORG1_TLSROOTCERTFILES=/opt/gopath/fabric-samples/personal-network/crypto-config/peerOrganizations/org1.personal-network.com/peers/peer0.org1.personal-network.com/tls/ca.crt
 export PEER_ORG2_TLSROOTCERTFILES=/opt/gopath/fabric-samples/personal-network/crypto-config/peerOrganizations/org2.personal-network.com/peers/peer0.org2.personal-network.com/tls/ca.crt
- 
+
+
 peer chaincode invoke -o orderer.personal-network.com:7050 \
     --tls true --cafile $ORDERER_CA -C channeldemo \
     -n becc --peerAddresses peer0.org1.personal-network.com:7051 \
